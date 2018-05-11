@@ -16,8 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Orleans.Streams\Orleans.Streams.Kafka\Orleans.Streams.Kafka.csproj" />
-    <ProjectReference Include="..\..\Orleans.Authentication.IdentityServer4\Orleans.Authentication.IdentityServer4.csproj" />
+    <ProjectReference Include="..\..\src\Orleans.Authentication.IdentityServer4\Orleans.Authentication.IdentityServer4.csproj" />
     <ProjectReference Include="..\IGrains\IGrains.csproj" />
   </ItemGroup>
 

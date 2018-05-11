@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Orleans.Streams\Orleans.Streams.Kafka\Orleans.Streams.Kafka.csproj" />
     <ProjectReference Include="..\IGrains\IGrains.csproj" />
   </ItemGroup>
 

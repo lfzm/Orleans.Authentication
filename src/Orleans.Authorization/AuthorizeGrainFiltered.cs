@@ -33,6 +33,7 @@ namespace Orleans.Authorization
                 await context.Invoke();
                 return;
             }
+        
             //已经授权无需再次授权
             if (RequestContext.Get(UserPrincipalKey) != null)
             {
@@ -73,6 +74,7 @@ namespace Orleans.Authorization
         }
         private AuthorizeAttribute FindAuthorizeAttribute(IIncomingGrainCallContext context)
         {
+        
             //检查context.Grain必须继承 Grain
             if (!typeof(Grain).IsAssignableFrom(context.Grain.GetType()))
                 return null;
@@ -99,6 +101,7 @@ namespace Orleans.Authorization
                 if (authAttr == null)
                     return null;
             }
+            this.Logger.LogDebug($"{context.ImplementationMethod.Name} Need authorization " );
             return authAttr;
         }
         private bool VerifyPolicy(IIncomingGrainCallContext context, ClaimsPrincipal principal, AuthorizeAttribute authAttr)
@@ -117,42 +120,13 @@ namespace Orleans.Authorization
                     this.Logger.LogError("Authorization ClaimsPrincipal Does not contain " + policy);
                     throw new AuthenticationException("Authorization ClaimsPrincipal Does not contain " + policy);
                 }
-                if (authAttr.Policy == AuthorizePolicys.USERID)
-                {
-                    //验证用户ID和Grain Key是否一样
-                    this.VerifyPolicySubject(context, claim);
-                }
+            
             }
 
             return true;
         }
-        /// <summary>
-        /// 验证 Policy中的Subject 和 Key是不是一样
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="claim"></param>
-        /// <returns></returns>
-        private bool VerifyPolicySubject(IIncomingGrainCallContext context, Claim claim)
-        {
-            if (context.Grain == null || claim == null)
-                return false;
-            if (claim.Type != JwtClaimTypes.Subject)
-                return false;
-            var id = this.GetPrimaryKey(context.Grain);
-            this.Logger.LogDebug("Subject value in Authorization ClaimsPrincipal " + id);
-            //判断Id是否一样
-            bool ise= claim.Value.Equals(id.ToString());
-            if (!ise)
-            {
-                this.Logger.LogError($"Subject value in Authorization ClaimsPrincipal does not match Grain key （{id}!={claim.Value}）");
-                throw new AuthenticationException($"Subject value in Authorization ClaimsPrincipal does not match Grain key （{id}!={claim.Value}）");
-            }
-            return ise;
-
-        }
-
-
-         private object GetPrimaryKey(GrainReference grainReference)
+       
+         private object GetPrimaryKey(IAddressable grainReference)
         {
             var key = grainReference.GetPrimaryKeyString();
             if (key != null)

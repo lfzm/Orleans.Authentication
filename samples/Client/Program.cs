@@ -80,16 +80,6 @@ namespace Client
                         .UseLocalhostClustering(gatewayPort)
                         .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(IAuthorize).Assembly).WithReferences())
                         .ConfigureLogging(logging => logging.AddConsole())
-                        .AddKafkaStreams("Kafka", opt =>
-                        {
-                            opt.TopicName = "Zop.Payment";
-                            opt.KafkaConfig.Add("group.id", "Orleans.Streams.Kafka.Group");
-                            opt.KafkaConfig.Add("socket.blocking.max.ms", 10);
-                            opt.KafkaConfig.Add("socket.send.buffer.bytes", 100000);
-                            //opt.KafkaConfig.Add("bootstrap.servers", "127.0.0.1:9092");
-                            opt.KafkaConfig.Add("bootstrap.servers", "120.79.162.19:9092");
-
-                        })
                         .Build();
 
                     await client.Connect();

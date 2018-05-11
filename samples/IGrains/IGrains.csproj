@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Orleans.Authorization\Orleans.Authorization.csproj" />
+    <ProjectReference Include="..\..\src\Orleans.Authorization\Orleans.Authorization.csproj" />
   </ItemGroup>
 
   <ItemGroup>
