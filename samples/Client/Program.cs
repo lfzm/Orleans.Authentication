@@ -5,8 +5,12 @@ using Orleans.Runtime;
 using Orleans.Runtime.Configuration;
 using Orleans.Streams;
 using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using System.Linq;
 
 namespace Client
 {
@@ -46,16 +50,9 @@ namespace Client
                         {
 
                             await DoClientWork(client);
-                            //await Kafka(client);
                         }
-
                     }
-
-                   
-
                 }
-
-                return;
             }
             catch (Exception e)
             {
@@ -114,10 +111,18 @@ namespace Client
                     return;
                 }
 
+                List<Claim> claims = new List<Claim>();
+                claims.Add(new Claim("sub", "id"));
+                var p= new ClaimsPrincipal(new ClaimsIdentity(claims));
+                string json = JsonConvert.SerializeObject(claims);
+
                 var friend = client.GetGrain<IAuthorize>(0);
-                RequestContext.Set("Authorization", "Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjVmZWZjNmE5YWM5MWFkZTYwYmFhMmRkZDM0YTkzNTJlIiwidHlwIjoiSldUIn0.eyJuYmYiOjE1MTc5MDg5MjYsImV4cCI6MTUxNzkxMjUyNiwiaXNzIjoiaHR0cDovL2F1dGguem9wLmFsaW5nZmx5LmNvbSIsImF1ZCI6WyJodHRwOi8vYXV0aC56b3AuYWxpbmdmbHkuY29tL3Jlc291cmNlcyIsInVjX2FwaSIsImZtX2FwaSIsInBheV9hcGkiXSwiY2xpZW50X2lkIjoiWk9QVEVTVCIsInN4c2V4Ijoi5aWzIiwic3ViIjoiMyIsImF1dGhfdGltZSI6MTUxNzE5NjI3NSwiaWRwIjoibG9jYWwiLCJzY29wZSI6WyJwcm9maWxlIiwicGhvbmUiLCJvcGVuaWQiLCJ1Y19hcGkiLCJmbV9hcGkiLCJwYXlfYXBpIiwib2ZmbGluZV9hY2Nlc3MiXSwiYW1yIjpbInB3ZCJdfQ.SAzFsWynN9J2DkqtItlgg33j0SA7nNDxcqeC6g1yhQ6eSE6Gzt5tEyI8cPFhv6YXdZ1U3VSLyLk_cPQt9eV32XSmxY4mDlq-dKTJIh0Rbt-XCythIuCoB-gYn40pV45X5Y8T-zd0aGs_w6ZNYbxyUaot5-_ZfCcvOQn6MwxMbOpgT1XwgMTeSpqtDqbgWEWArCkG5uBrdm5HekRe0qQNAXeQNk9ai0B_ZURNYvc2kzBQqut-OwcS6vtDeHNj8BflNHVa2P-Q7q_mG_W5PRtQ4NXraZwTaA-vsGAmR7bgJr6J4vgLQcCpDvJqG_SWqra6Bk2Wg2JXd5mKoXt7g7ildw");
+                RequestContext.Set("Authorization", "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE1MjgzNjE5MTUsImV4cCI6MTUyODM2NTUxNSwiaXNzIjoiaHR0cHM6Ly9hdXRoLnpnem9wLmNvbSIsImF1ZCI6WyJodHRwczovL2F1dGguemd6b3AuY29tL3Jlc291cmNlcyIsIklEQ19BUEkiLCJPVENfQVBJIiwiVUNfQVBJIl0sImNsaWVudF9pZCI6IjE3NTQwMDcyODg4ODc0MTg4OCIsInNjb3BlIjpbIklEQ19BUEkiLCJPVENfQVBJIiwiVUNfQVBJIl19.pES1QJjigtlIlMeOMXxwiwmXil6l10xlB6mAomSvLj9ZPePmCO-reQHNWJMcMxitZcQ0ikjXaglswH3ZEfpBRes14sVXbEVbGKDiyScbwfuyuVVILhHeq-ShtIl7xzr56uO-1J1r409EDJR4GHUT6P6ygdjUveXlSXXzWiN4XoKKWl0ZXZ3RGZ1G_JzdhUUAodjiApCTNNEIcQrv_lfPm5T5xavfAeOGSUPFcICu3Xb0YeknPTB76TgXJlTV6KvoDetvIGZrrRtMfbXPo8PAH7TUrySmvin5XoDJ-c_exPPR2C46EZ45hZ-_crJ_eFjRbu4g7zB4qYLEHqAjJojIjw");
                 var response = await friend.SayHelloAsync("Good morning, my friend!");
-                var auth = RequestContext.Get("AuthorizeResult");
+
+                //var friend1 = client.GetGrain<IAuthorize>(1);
+                //RequestContext.Set("Authorization", "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE1MjgzNjE5MTUsImV4cCI6MTUyODM2NTUxNSwiaXNzIjoiaHR0cHM6Ly9hdXRoLnpnem9wLmNvbSIsImF1ZCI6WyJodHRwczovL2F1dGguemd6b3AuY29tL3Jlc291cmNlcyIsIklEQ19BUEkiLCJPVENfQVBJIiwiVUNfQVBJIl0sImNsaWVudF9pZCI6IjE3NTQwMDcyODg4ODc0MTg4OCIsInNjb3BlIjpbIklEQ19BUEkiLCJPVENfQVBJIiwiVUNfQVBJIl19.pES1QJjigtlIlMeOMXxwiwmXil6l10xlB6mAomSvLj9ZPePmCO-reQHNWJMcMxitZcQ0ikjXaglswH3ZEfpBRes14sVXbEVbGKDiyScbwfuyuVVILhHeq-ShtIl7xzr56uO-1J1r409EDJR4GHUT6P6ygdjUveXlSXXzWiN4XoKKWl0ZXZ3RGZ1G_JzdhUUAodjiApCTNNEIcQrv_lfPm5T5xavfAeOGSUPFcICu3Xb0YeknPTB76TgXJlTV6KvoDetvIGZrrRtMfbXPo8PAH7TUrySmvin5XoDJ-c_exPPR2C46EZ45hZ-_crJ_eFjRbu4g7zB4qYLEHqAjJojIjw");
+                //var response1 = await friend1.SayHelloAsync("Good morning, my friend1   friend1!");
 
                 Console.WriteLine("\n\n{0}-{1}", response, DateTime.Now);
                 Console.WriteLine("\n{0}", count);
@@ -131,19 +136,6 @@ namespace Client
             }
         }
 
-        public static async Task Kafka(IClusterClient client)
-        {
-            count++;
-
-            System.Threading.Thread.Sleep(1000);
-            var dt = DateTime.Now;
-            var StreamProvider = client.GetStreamProvider("Kafka");
-            var Stream = StreamProvider.GetStream<string>(Guid.NewGuid(), "GrainImplicitStream");
-            //await Stream.OnNextAsync("测试" + DateTime.Now, new AsyncStreamSequenceToken());
-            await Stream.OnNextAsync("测试" + DateTime.Now);
-
-            Console.WriteLine("\n\n{0}", DateTime.Now);
-            Console.WriteLine("\n{0}--{1}", count,(DateTime.Now-dt).TotalMilliseconds);
-        }
+      
     }
 }

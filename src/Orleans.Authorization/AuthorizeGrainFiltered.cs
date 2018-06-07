@@ -4,11 +4,13 @@ using Orleans.Authentication;
 using Orleans.Runtime;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Authentication;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
+
 
 namespace Orleans.Authorization
 {
@@ -33,20 +35,6 @@ namespace Orleans.Authorization
                 await context.Invoke();
                 return;
             }
-        
-            //已经授权无需再次授权
-            if (RequestContext.Get(UserPrincipalKey) != null)
-            {
-                var UserPrincipal = RequestContext.Get(UserPrincipalKey);
-                if (UserPrincipal.GetType() == typeof(ClaimsPrincipal))
-                {
-                    if (this.VerifyPolicy(context,(ClaimsPrincipal)UserPrincipal, authAttr))
-                    {
-                        await context.Invoke();
-                        return;
-                    }
-                }
-            }
 
             //获取授权的方案
             var defaultAuthenticate = await Schemes.GetDefaultAuthenticateSchemeAsync();
@@ -59,7 +47,6 @@ namespace Orleans.Authorization
             //授权处理
             var authContext = new AuthenticateContext(ServiceProvider);
             var result = await authContext.AuthenticateAsync(defaultAuthenticate.Name);
-
             if (result?.Succeeded != true)
             {
                 this.Logger.LogError(result.Failure, result.Failure.Message);
@@ -67,8 +54,8 @@ namespace Orleans.Authorization
             }
 
             //验证 Policy
-            if (this.VerifyPolicy(context,result.Principal, authAttr))
-                RequestContext.Set(UserPrincipalKey, result.Principal);
+            if (this.VerifyPolicy(context, result.Principal, authAttr))
+                AuthorizeContext.User = result.Principal;
 
             await context.Invoke();
         }
@@ -104,6 +91,8 @@ namespace Orleans.Authorization
             this.Logger.LogDebug($"{context.ImplementationMethod.Name} Need authorization " );
             return authAttr;
         }
+
+
         private bool VerifyPolicy(IIncomingGrainCallContext context, ClaimsPrincipal principal, AuthorizeAttribute authAttr)
         {
             string policy = string.Empty;
@@ -114,15 +103,13 @@ namespace Orleans.Authorization
 
             if (!string.IsNullOrEmpty(policy))
             {
-                var claim = principal.FindFirst(authAttr.Policy);
+                var claim = principal.FindFirst( f=>f.Type == authAttr.Policy);
                 if (claim == null)
                 {
                     this.Logger.LogError("Authorization ClaimsPrincipal Does not contain " + policy);
                     throw new AuthenticationException("Authorization ClaimsPrincipal Does not contain " + policy);
                 }
-            
             }
-
             return true;
         }
        

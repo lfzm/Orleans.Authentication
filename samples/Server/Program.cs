@@ -71,25 +71,13 @@ namespace Server
                 {
                     authen.AddIdentityServerAuthentication(opt =>
                     {
-                        var config = context.Configuration.GetSection("ApiAuth").Get<IdentityServerAuthenticationOptions>();
-                        opt.RequireHttpsMetadata = config.Authority.Contains("https/");
-                        opt.Authority = config.Authority;
-                        opt.ApiName = config.ApiName;
-                        opt.ApiSecret = config.ApiSecret;
+                        opt.RequireHttpsMetadata = true;
+                        opt.Authority = "https://xxx.xxx.com/";
+                        opt.ApiName = "OTC_API";
                     });
                 }, IdentityServerAuthenticationDefaults.AuthenticationScheme)
                 .AddAuthorizationFilter();
 
-            //使用流
-            //.AddKafkaStreams("Kafka", opt =>
-            //{
-            //    opt.TopicName = "Zop.Payment";
-            //    opt.KafkaConfig.Add("group.id", "Orleans.Streams.Kafka.Group");
-            //    opt.KafkaConfig.Add("socket.blocking.max.ms", 10);
-            //    opt.KafkaConfig.Add("enable.auto.commit", false);
-            //    opt.KafkaConfig.Add("bootstrap.servers", "120.79.162.19:9092");
-
-            //});
 
             var host = builder.Build();
             await host.StartAsync();

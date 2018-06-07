@@ -17,11 +17,6 @@ namespace Server
         public static void ConfigureServices(HostBuilderContext builder, IServiceCollection services)
         {
         
-            services.AddAdoNetGrainStorage("PubSubStore", opt =>
-            {
-                opt.Invariant = "MySql.Data.MySqlClient";
-                opt.ConnectionString = "Database=orleans;Data Source=127.0.0.1;User Id=root;Password=sapass;pooling=false";
-            });
         }
         public static void ConfigureAppConfiguration(HostBuilderContext builder, IConfigurationBuilder config)
         {

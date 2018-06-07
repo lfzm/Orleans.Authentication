@@ -17,7 +17,7 @@ namespace IGrains
     /// <summary>
     /// Orleans grain implementation class HelloGrain.
     /// </summary>
-    //[Authorize]
+    [Authorize]
     public class AuthorizeGrain : Orleans.Grain, IAuthorize
     {
         private readonly ILogger Logger;
@@ -32,7 +32,6 @@ namespace IGrains
         }
         public override Task OnActivateAsync()
         {
-
             this.Handlers = base.ServiceProvider.GetRequiredService<IAuthenticationHandlerProvider>();
             return base.OnActivateAsync();
         }
@@ -40,13 +39,11 @@ namespace IGrains
 
         public async Task<User> SayHelloAsync(string greeting)
         {
-            var streamProvider = this.GetStreamProvider("Kafka");
-            var stream = streamProvider.GetStream<string>(this.GetPrimaryKey(), "GrainImplicitStream");
-            await stream.OnNextAsync(greeting);
-
             IServiceProvider serviceProvider = base.ServiceProvider.GetService<IServiceProvider>();
-            var user = RequestContext.Get("User");
-            string access = RequestContext.Get("access_token")?.ToString();
+            var user = this.User();
+            var userId = this.UserId();
+          await   base.GrainFactory.GetGrain<IAuthorize>(1).SayHelloAsync(greeting);
+            //string access = RequestContext.Get("access_token")?.ToString();
             this.Logger.LogInformation($"SayHello message received: greeting = '{greeting}'");
             return await Task.FromResult(new User());
         }
